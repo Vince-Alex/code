@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>高考倒计时</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #007bff; /* 默认背景颜色为蓝色 */
+            transition: background-color 0.5s, background-image 0.5s;
+        }
+        #title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #333;
+        }
+        #settingsButton {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            background-color: #007bff; /* 按钮颜色 */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+        }
+        #settingsButton:hover {
+            background-color: #0056b3; /* 按钮悬停颜色 */
+        }
+        .settings {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            width: 300px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.8); /* 毛玻璃效果背景 */
+            transition: backdrop-filter 0.5s;
+        }
+        .settings label, .settings input, .settings button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .settings input, .settings button {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        .settings button {
+            background-color: #007bff; /* 修改为蓝色 */
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .settings button:hover {
+            background-color: #0056b3; /* 按钮悬停颜色 */
+        }
+        .countdown {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+            transition: transform 0.5s, backdrop-filter 0.5s;
+            position: relative;
+        }
+        @keyframes countdownAnimation {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+        .countdown .fade-in-out {
+            animation: fadeInOut 1s ease-in-out;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            50% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(10px); }
+        }
+        .dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .dark-mode .settings {
+            background-color: rgba(51, 51, 51, 0.9);
+            color: #ffffff;
+            border: 1px solid #555;
+        }
+        .dark-mode .settings input, .dark-mode .settings button {
+            background-color: #555;
+            color: #ffffff;
+            border: 1px solid #666;
+        }
+        .dark-mode .settings button:hover {
+            background-color: #666;
+        }
+        .dark-mode #settingsButton {
+            background-color: #0056b3;
+        }
+        .dark-mode #settingsButton:hover {
+            background-color: #003d7a;
+        }
+        .fade-in {
+            animation: fadeIn 2s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .hidden {
+            display: none;
+        }
+        /* 小字样式 */
+        .footer-note {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: #666;
+            z-index: 1001;
+            cursor: pointer;
+        }
+        .footer-note a {
+            color: #666;
+            text-decoration: none;
+        }
+        .footer-note a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div id="title">高考倒计时</div>
+    <div class="countdown fade-in" id="countdown">
+        距离<span id="grade">高考</span>还有 <span id="days">--</span> 天 <span id="hours">--</span> 小时 <span id="minutes">--</span> 分钟 <span id="seconds">--</span> 秒
+    </div>
+    <button id="settingsButton">设置</button>
+    <div class="settings" id="settings">
+        <label for="gradeInput">年级:</label>
+        <input type="text" id="gradeInput" value="高考">
+        <label for="examDateInput">高考日期 (格式: YYYY-MM-DD):</label>
+        <input type="date" id="examDateInput" value="2026-06-07">
+        <label for="examTimeInput">高考时间 (格式: HH:MM):</label>
+        <input type="time" id="examTimeInput" value="09:00">
+        <label for="backgroundColor">背景颜色:</label>
+        <input type="color" id="backgroundColor" value="#007bff"> <!-- 修改为蓝色 -->
+        <label for="buttonColor">按钮颜色:</label>
+        <input type="color" id="buttonColor" value="#007bff"> <!-- 只保留一个按钮颜色选项 -->
+        <label for="backgroundImage">上传背景图片:</label>
+        <input type="file" id="backgroundImage" accept="image/*">
+        <label for="blurAmount">高斯模糊透明度:</label>
+        <input type="range" id="blurAmount" min="0" max="20" value="10">
+        <button id="applySettings">应用设置</button>
+        <button id="toggleMode">切换至黑暗模式</button>
+    </div>
+    <div class="footer-note">
+        <a href="https://github.com/Vince-Alex/code" target="_blank">By 26届23班 Alex</a>
+    </div>
+    <script>
+        let examDateTime = new Date('2026-06-07T09:00:00'); // 默认时间为2026年6月7日早上9点
+
+        function updateCountdown() {
+            var now = new Date();
+            var distance = examDateTime - now;
+
+            if (distance < 0) {
+                document.getElementById('countdown').innerHTML = "高考已经开始！";
+                return;
+            }
+
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // 更新带动画的数字
+            updateElement('days', days);
+            updateElement('hours', hours);
+            updateElement('minutes', minutes);
+            updateElement('seconds', seconds);
+
+            setTimeout(updateCountdown, 1000);
+        }
+
+        function updateElement(id, newValue) {
+            var element = document.getElementById(id);
+            if (element.textContent !== newValue.toString()) {
+                element.textContent = newValue;
+                element.classList.add('fade-in-out');
+                // 动画结束后移除动画类，以便下次动画能重新触发
+                element.addEventListener('animationend', function() {
+                    element.classList.remove('fade-in-out');
+                }, { once: true });
+            }
+        }
+
+        document.getElementById('settingsButton').addEventListener('click', function() {
+            var settings = document.getElementById('settings');
+            settings.style.display = settings.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.getElementById('toggleMode').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            var modeButton = document.getElementById('toggleMode');
+            modeButton.textContent = document.body.classList.contains('dark-mode') ? '切换至白天模式' : '切换至黑暗模式';
+        });
+
+        document.getElementById('applySettings').addEventListener('click', function() {
+            var grade = document.getElementById('gradeInput').value;
+            var examDate = document.getElementById('examDateInput').value;
+            var examTime = document.getElementById('examTimeInput').value;
+            var backgroundColor = document.getElementById('backgroundColor').value;
+            var buttonColor = document.getElementById('buttonColor').value;
+            var blurAmount = document.getElementById('blurAmount').value;
+
+            document.getElementById('grade').textContent = grade;
+            document.body.style.backgroundColor = backgroundColor;
+            document.getElementById('settingsButton').style.backgroundColor = buttonColor;
+            document.getElementById('applySettings').style.backgroundColor = buttonColor;
+            document.getElementById('toggleMode').style.backgroundColor = buttonColor;
+
+            // 应用高斯模糊和毛玻璃效果到所有相关元素
+            document.querySelectorAll('.settings, .countdown').forEach(el => {
+                el.style.backdropFilter = `blur(${blurAmount}px)`;
+                el.style.background = `rgba(255, 255, 255, 0.8)`; // 适当设置毛玻璃效果的背景
+            });
+
+            // 更新考试日期和时间
+            examDateTime = new Date(`${examDate}T${examTime}:00`);
+            
+            // 重新开始倒计时
+            updateCountdown();
+        });
+
+        // 文件选择背景图片
+        document.getElementById('backgroundImage').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.body.style.backgroundImage = `url(${e.target.result})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 初始化倒计时
+        updateCountdown();
+    </script>
+</body>
+</html>
